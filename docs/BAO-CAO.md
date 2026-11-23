@@ -111,6 +111,8 @@ Repository phát hành: https://github.com/MPV999/vcam-pro-2026
 | 1 | Workflow Android không xuất hiện | `secrets` không được dùng trong `if:` ở cấp step → workflow không hợp lệ. Đã map secret sang biến môi trường ở cấp job. |
 | 2 | `Set up Android SDK` thất bại | `android-actions/setup-android@v3` cài gói `tools` đã bị loại khỏi kho sdkmanager. Đã thay bằng SDK có sẵn trên runner + cài `platforms;android-34`, `build-tools;34.0.0`. |
 | 3 | Deploy Pages thất bại (403) | `POST /repos/{owner}/{repo}/pages` trả "Resource not accessible by integration": Pages phải được bật một lần trong Settings. Workflow nay cảnh báo và bỏ qua thay vì fail; website sẽ tự deploy sau khi bật. |
+| 4 | `:vcamsdk:compileDebugKotlin` thất bại | Thuộc tính `consumer` trong `BaseCameraSource` sinh setter `setConsumer(...)` trùng chữ ký JVM với hàm `setConsumer` của interface. Đã đổi tên trường thành `frameConsumer`. |
+| 5 | `:app:compileDebugKotlin` thất bại (5 lỗi) | (a) Pager của foundation 1.6 là API thử nghiệm → thêm `@OptIn(ExperimentalFoundationApi::class)`; (b) `KeyboardOptions` nằm ở `androidx.compose.foundation.text`; (c) `MediaStore.Files.FileColumns.MEDIA_TYPE` không tồn tại → đếm ảnh/video theo MIME type. |
 
 ### Việc cần làm một lần (chỉ chủ repository)
 
