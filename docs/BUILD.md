@@ -104,7 +104,7 @@ git tag v1.0.0
 git push origin v1.0.0
 ```
 
-Sau khi workflow hoàn tất, mở `https://github.com/MPV999/vcam-pro-ultimate/releases` để lấy APK.
+Sau khi workflow hoàn tất, mở `https://github.com/MPV999/vcam-pro-2026/releases` để lấy APK.
 
 ## 6. GitHub Pages
 
@@ -112,7 +112,7 @@ Lần deploy đầu tiên sẽ bật Pages (workflow dùng `actions/configure-pa
 và chọn nguồn **GitHub Actions**. Nếu tổ chức/tài khoản chặn việc bật tự động, vào
 **Settings → Pages → Build and deployment → Source: GitHub Actions** rồi chạy lại workflow.
 
-URL: `https://mpv999.github.io/vcam-pro-ultimate/`
+URL: `https://mpv999.github.io/vcam-pro-2026/`
 
 ## 7. Xử lý sự cố
 

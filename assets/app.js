@@ -7,7 +7,7 @@
 (function () {
   'use strict';
 
-  var REPO = 'MPV999/vcam-pro-ultimate';
+  var REPO = 'MPV999/vcam-pro-2026';
   var RELEASES_URL = 'https://github.com/' + REPO + '/releases';
   var state = { release: null };
 
