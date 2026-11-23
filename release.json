@@ -8,7 +8,7 @@
   "minAndroid": "Android 10 (API 29)",
   "abis": ["arm64-v8a", "armeabi-v7a"],
   "releaseDate": "",
-  "releaseUrl": "https://github.com/MPV999/vcam-pro/releases",
+  "releaseUrl": "https://github.com/MPV999/vcam-pro-ultimate/releases",
   "downloadUrl": "",
   "signed": false,
   "notes": "Bản phát hành đầu tiên đang được GitHub Actions dựng, ký và kiểm tra."

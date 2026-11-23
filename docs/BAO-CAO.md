@@ -92,8 +92,8 @@ Các mục "Một phần" nghĩa là phần logic thuần (toán học màu, chu
 | Mã nguồn Android | `android/app`, `android/vcamsdk` |
 | Virtual Camera Engine + SDK | `android/vcamsdk/src/main/java/com/vcampro/sdk` |
 | Website | `index.html`, `assets/`, `release.json` |
-| URL website | https://mpv999.github.io/vcam-pro/ |
-| URL tải APK | trang Releases: https://github.com/MPV999/vcam-pro/releases |
+| URL website | https://mpv999.github.io/vcam-pro-ultimate/ |
+| URL tải APK | trang Releases: https://github.com/MPV999/vcam-pro-ultimate/releases |
 | Workflow | `.github/workflows/` |
 | Tài liệu SDK | `docs/SDK.md` |
 | Hướng dẫn sử dụng | `docs/HUONG-DAN-SU-DUNG.md` |

@@ -8,8 +8,8 @@ Toàn bộ xử lý chạy trên thiết bị: không VPS, không backend, khôn
 | Nền tảng | Android 10+ (API 29), Kotlin, Jetpack Compose, Material 3 |
 | Gói ứng dụng | `com.vcampro.ultimate` |
 | Phiên bản | 1.0.x (xem `android/app/build.gradle.kts`) |
-| Website | https://mpv999.github.io/vcam-pro/ |
-| Bản phát hành | https://github.com/MPV999/vcam-pro/releases |
+| Website | https://mpv999.github.io/vcam-pro-ultimate/ |
+| Bản phát hành | https://github.com/MPV999/vcam-pro-ultimate/releases |
 | Ngôn ngữ | Tiếng Việt (mặc định, 100%) và English |
 
 ## Thành phần
