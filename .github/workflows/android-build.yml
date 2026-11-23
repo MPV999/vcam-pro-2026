@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -135,6 +135,43 @@ jobs:
             ${{ env.RELEASE_APK }}
             ${{ runner.temp }}/SHA256SUMS.txt
           retention-days: 30
+
+      # A public, directly downloadable APK on every main build, so the website
+      # always has a real file to serve without waiting for a manual tag.
+      - name: Publish release (main only)
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          TAG="v${RELEASE_VERSION}"
+          NOTES="$RUNNER_TEMP/release-notes.md"
+          {
+            echo "# VCAM PRO ULTIMATE VIP 2026 v${RELEASE_VERSION}"
+            echo ""
+            echo "Bản dựng tự động từ commit \`${GITHUB_SHA:0:7}\` trên nhánh main."
+            echo ""
+            echo "| Trường | Giá trị |"
+            echo "| --- | --- |"
+            echo "| Tệp APK | ${RELEASE_APK_NAME} |"
+            echo "| Dung lượng | ${RELEASE_APK_SIZE} bytes |"
+            echo "| Version code | ${RELEASE_VERSION_CODE:-0} |"
+            echo "| Android tối thiểu | 10 (API 29) |"
+            echo "| Kiến trúc | arm64-v8a, armeabi-v7a |"
+            echo ""
+            echo "SHA-256: ${RELEASE_SHA256}"
+            echo ""
+            echo "APK được dựng, xác thực bằng apksigner và ký bằng khoá debug của CI"
+            echo "khi chưa cấu hình signing secrets cho bản phát hành chính thức."
+          } > "$NOTES"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "$RELEASE_APK" "$RUNNER_TEMP/SHA256SUMS.txt" --clobber
+            gh release edit "$TAG" --notes-file "$NOTES"
+          else
+            gh release create "$TAG" "$RELEASE_APK" "$RUNNER_TEMP/SHA256SUMS.txt" \
+              --title "VCAM PRO ULTIMATE VIP 2026 v${RELEASE_VERSION}" \
+              --notes-file "$NOTES"
+          fi
 
       - name: Build summary
         run: |
