@@ -17,6 +17,9 @@ jobs:
   release:
     name: Build, sign and publish release
     runs-on: ubuntu-latest
+    env:
+      # `secrets` cannot be referenced from a step-level `if:`; map it once here.
+      VCAM_KEYSTORE_B64: ${{ secrets.VCAM_KEYSTORE_BASE64 }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -51,12 +54,12 @@ jobs:
           gradle-version: '8.9'
 
       - name: Restore release keystore
-        if: ${{ secrets.VCAM_KEYSTORE_BASE64 != '' }}
+        if: env.VCAM_KEYSTORE_B64 != ''
         working-directory: android
         run: |
           set -euo pipefail
           mkdir -p keystore
-          printf '%s' "${{ secrets.VCAM_KEYSTORE_BASE64 }}" | base64 --decode > keystore/release.jks
+          printf '%s' "$VCAM_KEYSTORE_B64" | base64 --decode > keystore/release.jks
           {
             echo "storePassword=${{ secrets.VCAM_KEYSTORE_PASSWORD }}"
             echo "keyAlias=${{ secrets.VCAM_KEY_ALIAS }}"

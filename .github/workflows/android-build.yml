@@ -16,6 +16,10 @@ jobs:
   build:
     name: Build, test and verify APK
     runs-on: ubuntu-latest
+    env:
+      # The `secrets` context is not allowed inside a step-level `if:`, so the
+      # secret is mapped to an environment variable once and the steps test that.
+      VCAM_KEYSTORE_B64: ${{ secrets.VCAM_KEYSTORE_BASE64 }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -35,12 +39,12 @@ jobs:
           gradle-version: '8.9'
 
       - name: Restore release keystore
-        if: ${{ secrets.VCAM_KEYSTORE_BASE64 != '' }}
+        if: env.VCAM_KEYSTORE_B64 != ''
         working-directory: android
         run: |
           set -euo pipefail
           mkdir -p keystore
-          printf '%s' "${{ secrets.VCAM_KEYSTORE_BASE64 }}" | base64 --decode > keystore/release.jks
+          printf '%s' "$VCAM_KEYSTORE_B64" | base64 --decode > keystore/release.jks
           {
             echo "storePassword=${{ secrets.VCAM_KEYSTORE_PASSWORD }}"
             echo "keyAlias=${{ secrets.VCAM_KEY_ALIAS }}"

@@ -71,15 +71,26 @@ jobs:
           PY
 
       - name: Configure Pages
+        id: pages
         uses: actions/configure-pages@v5
         with:
           enablement: true
+        continue-on-error: true
+
+      - name: Pages needs one-time enablement
+        if: steps.pages.outcome != 'success'
+        run: |
+          echo "::warning::GitHub Pages is not enabled for this repository yet."
+          echo "Open Settings -> Pages -> Build and deployment -> Source: GitHub Actions,"
+          echo "then re-run this workflow. The site itself is ready in _site/."
 
       - name: Upload artifact
+        if: steps.pages.outcome == 'success'
         uses: actions/upload-pages-artifact@v3
         with:
           path: _site
 
       - name: Deploy to GitHub Pages
         id: deployment
+        if: steps.pages.outcome == 'success'
         uses: actions/deploy-pages@v4
