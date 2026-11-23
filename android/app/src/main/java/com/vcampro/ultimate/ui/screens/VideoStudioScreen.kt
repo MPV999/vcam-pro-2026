@@ -372,8 +372,8 @@ fun VideoStudioScreen(onBack: () -> Unit) {
                             onClick = {
                                 runExport(
                                     VideoEditorEngine.ExportOptions(
-                                        trimStartMs = (info?.durationMs ?: 0L) * trimStart,
-                                        trimEndMs = (info?.durationMs ?: 0L) * trimEnd,
+                                        trimStartMs = ((info?.durationMs ?: 0L) * trimStart).toLong(),
+                                        trimEndMs = ((info?.durationMs ?: 0L) * trimEnd).toLong(),
                                         targetWidth = if (targetHeight > 0) {
                                             ((info?.width ?: 16) * targetHeight / (info?.height ?: 9))
                                         } else {
@@ -396,8 +396,8 @@ fun VideoStudioScreen(onBack: () -> Unit) {
                             onClick = {
                                 runExport(
                                     VideoEditorEngine.ExportOptions(
-                                        trimStartMs = (info?.durationMs ?: 0L) * trimStart,
-                                        trimEndMs = (info?.durationMs ?: 0L) * trimEnd,
+                                        trimStartMs = ((info?.durationMs ?: 0L) * trimStart).toLong(),
+                                        trimEndMs = ((info?.durationMs ?: 0L) * trimEnd).toLong(),
                                         targetWidth = 1280,
                                         targetHeight = 720,
                                         muteAudio = muteAudio

@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.LinearGradient
 import android.graphics.Paint
 import android.graphics.Shader
@@ -54,6 +53,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -527,7 +527,7 @@ private fun createTestPattern(width: Int, height: Int): Bitmap {
     )
     canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), paint)
     paint.shader = null
-    paint.color = Color.WHITE
+    paint.color = android.graphics.Color.WHITE
     paint.textSize = height / 9f
     paint.textAlign = Paint.Align.CENTER
     canvas.drawText("VCAM PRO", width / 2f, height / 2f, paint)
