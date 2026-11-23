@@ -11,5 +11,5 @@
   "releaseUrl": "https://github.com/MPV999/vcam-pro-2026/releases",
   "downloadUrl": "",
   "signed": false,
-  "notes": "Bản phát hành đầu tiên đang được GitHub Actions dựng, ký và kiểm tra."
+  "notes": "Trang đọc bản phát hành trực tiếp từ GitHub API. Tệp này chỉ là phương án dự phòng khi không gọi được API."
 }

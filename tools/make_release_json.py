@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Turn the latest GitHub release into the website's release.json.
+"""Turn the latest GitHub release into the website's release.json fallback.
 
 Usage: make_release_json.py <gh-release.json> <output.json>
 
-The input is the JSON produced by `gh release view --json tagName,name,body,
-publishedAt,url,assets`. An empty object (or a missing file) means no release
-exists yet, and the site then shows the "pending" state instead of inventing a
-version.
+The site reads the releases live from the GitHub API; this file is only a
+fallback for the case where that request cannot be made. An empty object (or a
+missing file) means no release exists yet, and the site then shows the pending
+state instead of inventing a version.
 """
 from __future__ import annotations
 
@@ -17,6 +17,7 @@ import sys
 
 MIN_ANDROID = "Android 10 (API 29)"
 DEFAULT_ABIS = ["arm64-v8a", "armeabi-v7a"]
+DEBUG_RE = re.compile(r"khoá debug|khoa debug|debug-signed|debug signing", re.IGNORECASE)
 
 
 def load(path: str) -> dict:
@@ -28,6 +29,17 @@ def load(path: str) -> dict:
         return {}
 
 
+def version_code(tag: str, body: str) -> int:
+    match = re.search(r"Version\s*code\s*\|?\s*(\d+)", body, re.IGNORECASE)
+    if match:
+        value = int(match.group(1))
+        if value > 0:
+            return value
+    parts = [p for p in re.split(r"[.\-+_]", tag.lstrip("v")) if p.isdigit()]
+    numbers = [int(p) for p in parts[:3]] + [0, 0, 0]
+    return numbers[0] * 10000 + numbers[1] * 100 + numbers[2]
+
+
 def build(data: dict) -> dict:
     tag = (data.get("tagName") or "").strip()
     body = data.get("body") or ""
@@ -36,6 +48,10 @@ def build(data: dict) -> dict:
     version = tag.lstrip("v")
     apk = next(
         (asset for asset in assets if str(asset.get("name", "")).lower().endswith(".apk")),
+        None,
+    )
+    sums = next(
+        (asset for asset in assets if "sha256" in str(asset.get("name", "")).lower()),
         None,
     )
 
@@ -56,24 +72,12 @@ def build(data: dict) -> dict:
             "notes": body,
         }
 
-    sha_match = re.search(r"SHA-256:\s*([0-9a-fA-F]{64})", body)
-    code_match = re.search(r"Version code:\s*(\d+)", body)
-    version_code = 0
-    if code_match:
-        version_code = int(code_match.group(1))
-    else:
-        parts = [p for p in re.split(r"[.\-+]", version) if p.isdigit()]
-        if parts:
-            numbers = [int(p) for p in parts[:3]] + [0, 0, 0]
-            version_code = numbers[0] * 10000 + numbers[1] * 100 + numbers[2]
-
-    notes = re.sub(r"\n?SHA-256:\s*[0-9a-fA-F]{64}\s*", "\n", body)
-    notes = re.sub(r"\n?Version code:\s*\d+\s*", "\n", notes)
+    sha_match = re.search(r"SHA-?256:?\s*([0-9a-fA-F]{64})", body)
 
     return {
         "published": True,
         "version": version,
-        "versionCode": version_code,
+        "versionCode": version_code(version, body),
         "apkName": apk.get("name", ""),
         "apkSize": apk.get("size", 0),
         "sha256": (sha_match.group(1).lower() if sha_match else ""),
@@ -82,8 +86,9 @@ def build(data: dict) -> dict:
         "releaseDate": data.get("publishedAt") or "",
         "releaseUrl": data.get("url") or "https://github.com/MPV999/vcam-pro-2026/releases",
         "downloadUrl": apk.get("url") or "",
-        "signed": bool(sha_match),
-        "notes": notes.strip(),
+        "sumsUrl": (sums.get("url") if sums else ""),
+        "signed": not DEBUG_RE.search(body),
+        "notes": body.strip(),
     }
 
 

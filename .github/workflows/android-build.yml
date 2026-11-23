@@ -122,6 +122,7 @@ jobs:
           {
             echo "RELEASE_APK=$OUT"
             echo "RELEASE_VERSION=$VERSION"
+            echo "RELEASE_VERSION_CODE=${{ github.run_number }}"
             echo "RELEASE_APK_NAME=$(basename "$OUT")"
             echo "RELEASE_APK_SIZE=$(stat -c%s "$OUT")"
             echo "RELEASE_SHA256=$(sha256sum "$OUT" | cut -d' ' -f1)"
