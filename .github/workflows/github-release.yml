@@ -147,8 +147,7 @@ jobs:
           else
             gh release create "$TAG" "$APK" "$RUNNER_TEMP/SHA256SUMS.txt" \
               --title "VCAM PRO ULTIMATE VIP 2026 v${{ steps.version.outputs.version }}" \
-              --notes-file "$RUNNER_TEMP/notes.md" \
-              --target "$GITHUB_SHA"
+              --notes-file "$RUNNER_TEMP/notes.md"
           fi
 
       - name: Publish summary
