@@ -121,7 +121,9 @@ URL: `https://mpv999.github.io/vcam-pro-2026/`
 | `SDK location not found` | thiếu `ANDROID_HOME` | đặt biến môi trường hoặc tạo `android/local.properties` với `sdk.dir=...` |
 | `Plugin [id: 'com.google.devtools.ksp'] was not found` | thiếu mavenCentral/google | kiểm tra `settings.gradle.kts` |
 | `Unresolved reference: SpeedChangeEffect` | phiên bản Media3 không khớp | giữ `media3 1.3.1` hoặc thay bằng API speed mới hơn |
-| `INSTALL_FAILED_UPDATE_INCOMPATIBLE` | APK cũ ký bằng khoá khác | gỡ bản cũ trước khi cài bản ký mới |
+| `INSTALL_FAILED_UPDATE_INCOMPATIBLE` | APK cũ ký bằng khoá khác | gỡ bản cũ trước khi cài bản ký mới. Bản dựng CI dùng keystore debug sinh mới trên mỗi runner, nên mỗi lần cài bản mới đều phải gỡ bản cũ |
+| Cài được nhưng mở là thoát | thường do R8/Shrinker cắt mất lớp dùng reflection (Room, DataStore, ML Kit) | release hiện tắt minify; nếu bật lại, kiểm tra `proguard-rules.pro` trên máy thật trước |
+| Mở app thấy màn hình "lỗi khi khởi động" | ứng dụng đã ghi lại lỗi thật của lần mở trước | bấm **Sao chép báo cáo** để lấy stack trace, hoặc **Xóa báo cáo và mở lại** để thử lại |
 | Website hiển thị "Chưa có bản phát hành" | chưa có release hoặc `release.json` chưa được sinh | kiểm tra workflow `website-deploy.yml` |
 | Tải APK 404 | asset chưa upload xong | mở lại trang Releases, kiểm tra log `github-release.yml` |
 
