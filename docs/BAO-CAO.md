@@ -100,3 +100,26 @@ Các mục "Một phần" nghĩa là phần logic thuần (toán học màu, chu
 | Hướng dẫn build/ký | `docs/BUILD.md` |
 | Changelog | `docs/CHANGELOG.md` |
 | Release notes | `docs/RELEASE-NOTES.md` |
+
+
+## 7. Nhật ký CI thực tế (cập nhật theo từng lần chạy)
+
+Repository phát hành: https://github.com/MPV999/vcam-pro-2026
+
+| Lần chạy | Kết quả | Nguyên nhân / xử lý |
+| --- | --- | --- |
+| 1 | Workflow Android không xuất hiện | `secrets` không được dùng trong `if:` ở cấp step → workflow không hợp lệ. Đã map secret sang biến môi trường ở cấp job. |
+| 2 | `Set up Android SDK` thất bại | `android-actions/setup-android@v3` cài gói `tools` đã bị loại khỏi kho sdkmanager. Đã thay bằng SDK có sẵn trên runner + cài `platforms;android-34`, `build-tools;34.0.0`. |
+| 3 | Deploy Pages thất bại (403) | `POST /repos/{owner}/{repo}/pages` trả "Resource not accessible by integration": Pages phải được bật một lần trong Settings. Workflow nay cảnh báo và bỏ qua thay vì fail; website sẽ tự deploy sau khi bật. |
+
+### Việc cần làm một lần (chỉ chủ repository)
+
+1. Mở **Settings → Pages → Build and deployment → Source: GitHub Actions**.
+2. Chạy lại workflow **Deploy Website** (hoặc push một thay đổi nhỏ).
+3. Thêm 4 secrets ký APK như mô tả trong `docs/BUILD.md` để APK có chữ ký phát hành chính thức.
+
+### Ghi chú về tên repository
+
+Tài khoản đã có hai lần thử trước ở `MPV999/vcam-pro` và `MPV999/vcam-pro-ultimate`
+(mỗi repo có lịch sử riêng, cấu trúc module khác). Bản này được phát hành riêng tại
+`MPV999/vcam-pro-2026` để không ghi đè công việc cũ.
