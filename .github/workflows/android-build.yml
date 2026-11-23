@@ -72,14 +72,34 @@ jobs:
         env:
           VCAM_VERSION_CODE: ${{ github.run_number }}
           VCAM_VERSION_NAME: 1.0.${{ github.run_number }}
-        run: gradle :vcamsdk:testDebugUnitTest :app:testDebugUnitTest --no-daemon --stacktrace
+        run: |
+          set +e
+          gradle :vcamsdk:testDebugUnitTest :app:testDebugUnitTest --no-daemon --stacktrace > /tmp/unit.log 2>&1
+          status=$?
+          if [ $status -ne 0 ]; then
+            echo "::group::Kotlin / test errors"
+            grep -E "^e: |FAILED|AssertionError|expected:|Caused by" /tmp/unit.log | head -80 | sed 's/^/::error::/'
+            echo "::endgroup::"
+            tail -60 /tmp/unit.log
+          fi
+          exit $status
 
       - name: Assemble release APK
         working-directory: android
         env:
           VCAM_VERSION_CODE: ${{ github.run_number }}
           VCAM_VERSION_NAME: 1.0.${{ github.run_number }}
-        run: gradle :app:assembleRelease --no-daemon --stacktrace
+        run: |
+          set +e
+          gradle :app:assembleRelease --no-daemon --stacktrace > /tmp/release.log 2>&1
+          status=$?
+          if [ $status -ne 0 ]; then
+            echo "::group::Kotlin / R8 errors"
+            grep -E "^e: |error:|FAILURE|Caused by" /tmp/release.log | head -80 | sed 's/^/::error::/'
+            echo "::endgroup::"
+            tail -60 /tmp/release.log
+          fi
+          exit $status
 
       - name: Validate and checksum APK
         working-directory: android
