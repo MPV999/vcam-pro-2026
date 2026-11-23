@@ -62,13 +62,26 @@ Ký phát hành: đặt `android/keystore/release.jks` + `android/keystore/keyst
 
 Website không bao giờ hiển thị phiên bản giả: khi chưa có bản phát hành, trang hiển thị trạng thái chờ.
 
+## Camera nền & bong bóng nổi
+
+Trong **Virtual Camera Studio** có mục *Lớp phủ & bong bóng nổi*:
+
+- chọn một ảnh làm lớp phủ, chỉnh ngang/dọc/kích thước/độ đậm bằng thanh trượt, hoặc
+- bấm **Chạy nền** để phiên tiếp tục chạy sau khi thoát ứng dụng, kèm **bong bóng nổi** kéo được
+  điều khiển đúng các thông số đó trên màn hình khác.
+
+Nguồn nền có thể là camera, **video có sẵn** hoặc ảnh tĩnh; khung hình sau khi ghép được đẩy qua
+`ProcessedFrameSource` → `VirtualCameraSession` cho ứng dụng tích hợp SDK. Cần quyền
+"Hiển thị trên ứng dụng khác" cho bong bóng.
+
 ## Giới hạn đã biết (quan trọng)
 
-- **Virtual camera toàn hệ thống là không khả thi trên Android.** Không có API công khai cho phép một ứng dụng
-  thay thế camera của ứng dụng khác. VCAM PRO cấp khung hình qua SDK cho ứng dụng tích hợp SDK.
-  Ứng dụng không dùng root, không hook, không sửa camera HAL, không can thiệp ứng dụng ngân hàng/KYC.
+- **Không có root, không hook camera HAL, không chèn khung hình vào camera của ứng dụng khác.**
+  Android không có API công khai cho việc đó, và việc giả lập camera cho ứng dụng ngân hàng/KYC là
+  hành vi gian lận nên dự án không cung cấp. VCAM PRO chỉ ghép khung hình trong pipeline của chính nó
+  và cấp qua SDK cho ứng dụng do bạn kiểm soát.
 - **Kiểm thử thiết bị thật chưa thực hiện** trong môi trường phát triển này (không có điện thoại kết nối).
-  Mọi tuyên bố về camera, quay video và xuất media cần được xác nhận trên máy thật.
+  Mọi tuyên bố về camera, quay video, xuất media và bong bóng nổi cần được xác nhận trên máy thật.
 - **Ký phát hành** cần signing secrets. Nếu chưa cấu hình, CI tạo APK ký bằng khóa debug để vẫn cài được,
   và website ghi rõ đây là bản dựng chưa ký phát hành.
 

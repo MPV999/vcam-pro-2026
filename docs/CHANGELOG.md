@@ -7,6 +7,16 @@ Mọi thay đổi đáng chú ý của VCAM PRO ULTIMATE VIP 2026 được ghi �
 
 ### Thêm mới
 
+#### Camera nền & bong bóng nổi (1.0.x)
+- `VirtualCameraService`: foreground service giữ phiên camera ảo sống sau khi thoát ứng dụng,
+  kèm thông báo thường trực và nút dừng trong bong bóng.
+- Bong bóng nổi (`TYPE_APPLICATION_OVERLAY`) kéo được, mở bảng điều khiển: ← → ↑ ↓, Nhỏ/To,
+  Mờ/Rõ, Đặt lại, Dừng. Mọi thay đổi áp dụng ngay vào khung hình kế tiếp.
+- `FrameCompositor`: ghép một ảnh lớp phủ lên khung hình theo toạ độ tương đối, độ phóng và độ đậm,
+  kết quả là NV21 nên đi tiếp được qua SDK như khung hình bình thường.
+- `OverlayState`: trạng thái dùng chung giữa thanh trượt trong ứng dụng và bong bóng.
+- Nguồn nền chọn được: camera trước/sau, video có sẵn, ảnh tĩnh.
+
 #### Ứng dụng (`:app`)
 - 13 màn hình: Splash, Onboarding, Dashboard, Camera Studio, Photo Studio, Video Studio,
   Virtual Camera Studio, Media Library, AI Vision, Device Center, Security Center, Settings, About.

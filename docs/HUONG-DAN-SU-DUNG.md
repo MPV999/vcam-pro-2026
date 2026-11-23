@@ -58,7 +58,6 @@ Thông tin HDR và độ phân giải hiển thị theo khả năng thật của
 Kết quả được lưu vào `Movies/VCAM PRO`.
 
 ## 6. Virtual Camera Studio
-
 1. Chọn **Nguồn dữ liệu**: camera trước, camera sau, tệp video, tệp ảnh, hoặc khung hình đã xử lý.
 2. Chọn độ phân giải 720p/1080p và FPS (15–60).
 3. Bấm **Bắt đầu phiên**. Khung hình xem trước hiển thị dữ liệu thật engine đang cấp cho consumer.
@@ -68,6 +67,20 @@ Kết quả được lưu vào `Movies/VCAM PRO`.
 7. **Kết thúc phiên** giải phóng camera/codec.
 
 Ứng dụng không thể thay camera của ứng dụng khác — xem mục giới hạn trong README và tài liệu SDK.
+
+### Lớp phủ và bong bóng nổi
+
+1. Trong mục *Lớp phủ & bong bóng nổi*, bấm **Chọn ảnh lớp phủ** để đưa một ảnh (logo, sản phẩm…) lên khung hình.
+2. Chỉnh **Ngang**, **Dọc**, **Kích thước**, **Độ đậm** bằng thanh trượt — khung xem trước cập nhật ngay.
+3. Bật **Bong bóng nổi khi thoát ứng dụng**, bấm **Chạy nền**. Lần đầu Android sẽ hỏi quyền
+   "Hiển thị trên ứng dụng khác"; nếu chưa cấp, ứng dụng mở thẳng trang cài đặt đó.
+4. Thoát ứng dụng: một bong bóng **VC** xuất hiện. Kéo để di chuyển bong bóng; chạm để mở bảng điều khiển:
+   ← → ↑ ↓ (dịch lớp phủ), Nhỏ/To (kích thước), Mờ/Rõ (độ đậm), Đặt lại, Dừng.
+5. Bấm **Dừng nền** trong ứng dụng hoặc **Dừng** trên bong bóng để kết thúc phiên và tắt bong bóng.
+
+Nguồn nền có thể là camera trước/sau, video có sẵn hoặc ảnh tĩnh. Khung hình đã ghép chỉ đi qua
+`ProcessedFrameSource` → `VirtualCameraSession` (ứng dụng tích hợp SDK), không chèn vào camera của
+ứng dụng khác.
 
 ## 7. Thư viện Media
 

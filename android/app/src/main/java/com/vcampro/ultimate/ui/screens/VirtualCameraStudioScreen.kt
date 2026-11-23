@@ -1,6 +1,7 @@
 package com.vcampro.ultimate.ui.screens
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -8,6 +9,7 @@ import android.graphics.LinearGradient
 import android.graphics.Paint
 import android.graphics.Shader
 import android.net.Uri
+import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -60,6 +62,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vcampro.sdk.CameraSource
 import com.vcampro.sdk.FrameConfiguration
 import com.vcampro.sdk.FrameConsumer
@@ -71,7 +74,12 @@ import com.vcampro.sdk.VcamSdk
 import com.vcampro.sdk.VideoFileSource
 import com.vcampro.sdk.VirtualCameraSession
 import com.vcampro.sdk.YuvConverter
+import com.vcampro.ultimate.core.di.AppGraph
 import com.vcampro.ultimate.core.i18n.LocalStrings
+import com.vcampro.ultimate.core.overlay.OverlayState
+import com.vcampro.ultimate.core.ui.components.ToggleRow
+import com.vcampro.ultimate.service.VirtualCameraRuntime
+import com.vcampro.ultimate.service.VirtualCameraService
 import com.vcampro.ultimate.core.ui.components.InfoRow
 import com.vcampro.ultimate.core.ui.components.LabeledSlider
 import com.vcampro.ultimate.core.ui.components.SectionTitle
@@ -126,6 +134,28 @@ fun VirtualCameraStudioScreen(onBack: () -> Unit) {
         ActivityResultContracts.PickVisualMedia()
     ) { uri -> if (uri != null) pickedUri = uri }
 
+    val overlayParams by OverlayState.params.collectAsStateWithLifecycle()
+    val overlayLayer by OverlayState.layer.collectAsStateWithLifecycle()
+    val runtimeRunning by VirtualCameraRuntime.running.collectAsStateWithLifecycle()
+    val runtimeMessage by VirtualCameraRuntime.message.collectAsStateWithLifecycle()
+    var bubbleEnabled by remember { mutableStateOf(true) }
+
+    val layerPicker = rememberLauncherForActivityResult(
+        ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        if (uri != null) {
+            scope.launch {
+                val bitmap = AppGraph.photoEditor.loadBitmap(context, uri, 1024)
+                if (bitmap != null) {
+                    OverlayState.setLayer(bitmap)
+                    status = "Đã nạp lớp phủ"
+                } else {
+                    status = "Không đọc được ảnh lớp phủ"
+                }
+            }
+        }
+    }
+
     val previewConsumer = remember {
         object : FrameConsumer {
             private var lastPreviewNanos = 0L
@@ -173,6 +203,8 @@ fun VirtualCameraStudioScreen(onBack: () -> Unit) {
 
     fun startSession() {
         scope.launch {
+            // Only one pipeline may own the camera at a time.
+            VirtualCameraService.stop(context)
             if (sourceType.startsWith("camera") && !hasCameraPermission) {
                 permissionLauncher.launch(arrayOf(Manifest.permission.CAMERA))
                 return@launch
@@ -497,6 +529,129 @@ fun VirtualCameraStudioScreen(onBack: () -> Unit) {
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.primary
                 )
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+            SectionTitle("Lớp phủ & bong bóng nổi")
+            VcamCard {
+                Text(
+                    text = "Chèn một ảnh làm lớp phủ lên khung hình (nguồn video có sẵn hoặc camera), " +
+                        "rồi tinh chỉnh vị trí bằng thanh trượt ở đây hoặc bằng bong bóng nổi sau khi thoát ứng dụng.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                VcamPrimaryButton(
+                    text = if (overlayLayer == null) "Chọn ảnh lớp phủ" else "Đổi ảnh lớp phủ",
+                    icon = Icons.Filled.Image,
+                    onClick = {
+                        layerPicker.launch(
+                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                        )
+                    }
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                InfoRow(
+                    label = "Lớp phủ",
+                    value = if (overlayLayer == null) "Chưa chọn" else "Đã nạp"
+                )
+                LabeledSlider(
+                    label = "Ngang (trái/phải)",
+                    value = overlayParams.offsetX,
+                    valueRange = -0.45f..0.45f,
+                    onValueChange = { value -> OverlayState.update { it.copy(offsetX = value) } },
+                    valueText = "%.0f%%".format(overlayParams.offsetX * 100)
+                )
+                LabeledSlider(
+                    label = "Dọc (lên/xuống)",
+                    value = overlayParams.offsetY,
+                    valueRange = -0.45f..0.45f,
+                    onValueChange = { value -> OverlayState.update { it.copy(offsetY = value) } },
+                    valueText = "%.0f%%".format(overlayParams.offsetY * 100)
+                )
+                LabeledSlider(
+                    label = "Kích thước lớp phủ",
+                    value = overlayParams.scale,
+                    valueRange = 0.1f..1f,
+                    onValueChange = { value -> OverlayState.update { it.copy(scale = value) } },
+                    valueText = "%.0f%%".format(overlayParams.scale * 100)
+                )
+                LabeledSlider(
+                    label = "Độ đậm",
+                    value = overlayParams.alpha,
+                    valueRange = 0.15f..1f,
+                    onValueChange = { value -> OverlayState.update { it.copy(alpha = value) } },
+                    valueText = "%.0f%%".format(overlayParams.alpha * 100)
+                )
+                ToggleRow(
+                    title = "Bong bóng nổi khi thoát ứng dụng",
+                    checked = bubbleEnabled,
+                    onCheckedChange = { bubbleEnabled = it },
+                    description = "Bong bóng cần quyền \"Hiển thị trên ứng dụng khác\"."
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Box(modifier = Modifier.weight(1f)) {
+                        VcamPrimaryButton(
+                            text = "Chạy nền",
+                            icon = Icons.Filled.PlayArrow,
+                            onClick = {
+                                val needsOverlayPermission =
+                                    bubbleEnabled && !Settings.canDrawOverlays(context)
+                                if (needsOverlayPermission) {
+                                    runCatching {
+                                        context.startActivity(
+                                            Intent(
+                                                Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                                                Uri.parse("package:${context.packageName}")
+                                            ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                        )
+                                    }
+                                    status = "Hãy cấp quyền hiển thị trên ứng dụng khác rồi bấm Chạy nền lần nữa"
+                                } else {
+                                    val needsFile = sourceType == "video" || sourceType == "image"
+                                    if (needsFile && pickedUri == null) {
+                                        status = "Hãy chọn tệp nguồn trước"
+                                    } else {
+                                        // Hand the camera over to the background pipeline.
+                                        session.stop()
+                                        session.setSource(null)
+                                        activeSource = null
+                                        previewBitmap = null
+                                        VirtualCameraService.start(
+                                            context = context,
+                                            sourceType = sourceType,
+                                            uri = pickedUri?.toString(),
+                                            width = if (resolution == "1080p") 1920 else 1280,
+                                            height = if (resolution == "1080p") 1080 else 720,
+                                            fps = fps,
+                                            bubble = bubbleEnabled
+                                        )
+                                        status = "Đã chạy nền"
+                                    }
+                                }
+                            }
+                        )
+                    }
+                    Box(modifier = Modifier.weight(1f)) {
+                        VcamPrimaryButton(
+                            text = "Dừng nền",
+                            icon = Icons.Filled.Stop,
+                            onClick = {
+                                VirtualCameraService.stop(context)
+                                status = "Đã dừng chế độ nền"
+                            }
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(6.dp))
+                InfoRow(
+                    label = "Chế độ nền",
+                    value = if (runtimeRunning) "Đang chạy" else "Đang tắt"
+                )
+                if (runtimeMessage != null) {
+                    InfoRow(label = "Thông báo", value = runtimeMessage ?: "")
+                }
             }
 
             Spacer(modifier = Modifier.height(12.dp))

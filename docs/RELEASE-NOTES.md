@@ -3,6 +3,17 @@
 Bản phát hành Android native đầu tiên của VCAM PRO: camera chuyên nghiệp, studio ảnh, studio video,
 Virtual Camera Engine và SDK cấp khung hình YUV. Xử lý 100% trên thiết bị.
 
+## Mới trong bản này
+
+### Camera nền & bong bóng nổi
+- Chạy phiên camera ảo dưới dạng foreground service, tiếp tục hoạt động sau khi thoát ứng dụng.
+- Bong bóng nổi (cần quyền "Hiển thị trên ứng dụng khác") để kéo lớp phủ sang trái/phải, lên/xuống,
+  phóng to/thu nhỏ, tăng/giảm độ đậm, đặt lại hoặc dừng phiên — tất cả ngay trên màn hình khác.
+- Nguồn nền có thể là camera trước/sau, **tệp video có sẵn** hoặc ảnh tĩnh; lớp phủ là một ảnh do bạn chọn.
+- Khung hình sau khi ghép được đẩy qua `ProcessedFrameSource` → `VirtualCameraSession`, tức là chỉ tới
+  ứng dụng tích hợp SDK này. Ứng dụng **không** root, không sửa camera HAL và không chèn vào camera của
+  ứng dụng khác.
+
 ## Điểm mới
 
 ### Camera Studio
