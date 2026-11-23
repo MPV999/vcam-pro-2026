@@ -26,7 +26,7 @@ abstract class BaseCameraSource : CameraSource {
     private val sequence = AtomicLong(0L)
 
     @Volatile
-    protected var consumer: FrameConsumer? = null
+    protected var frameConsumer: FrameConsumer? = null
 
     @Volatile
     protected var configuration: FrameConfiguration = FrameConfiguration()
@@ -47,7 +47,7 @@ abstract class BaseCameraSource : CameraSource {
     private var lastTimestampUs: Long = 0L
 
     override fun setConsumer(consumer: FrameConsumer?) {
-        this.consumer = consumer
+        this.frameConsumer = consumer
     }
 
     protected fun setState(newState: SourceState) {
@@ -80,7 +80,7 @@ abstract class BaseCameraSource : CameraSource {
         timestampUs: Long = System.nanoTime() / 1_000L,
         format: FrameFormat = configuration.format
     ): Boolean {
-        val target = consumer
+        val target = frameConsumer
         if (target == null) {
             dropped.incrementAndGet()
             publishStats(timestampUs)
