@@ -1,5 +1,6 @@
 package com.vcampro.ultimate.ui.screens
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -34,6 +35,7 @@ import com.vcampro.ultimate.core.i18n.LocalStrings
 import com.vcampro.ultimate.core.ui.components.VcamPrimaryButton
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun OnboardingScreen(onFinished: () -> Unit) {
     val strings = LocalStrings.current

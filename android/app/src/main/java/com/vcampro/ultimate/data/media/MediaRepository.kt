@@ -258,18 +258,23 @@ class MediaRepository(
         runCatching {
             context.contentResolver.query(
                 MediaStore.Files.getContentUri("external"),
-                arrayOf(MediaStore.MediaColumns.SIZE, MediaStore.MediaColumns.RELATIVE_PATH, MediaStore.MediaColumns.MEDIA_TYPE),
+                arrayOf(
+                    MediaStore.MediaColumns.SIZE,
+                    MediaStore.MediaColumns.RELATIVE_PATH,
+                    MediaStore.MediaColumns.MIME_TYPE
+                ),
                 "${MediaStore.MediaColumns.RELATIVE_PATH} LIKE ?",
                 arrayOf("%VCAM PRO%"),
                 null
             )?.use { cursor ->
                 val sizeColumn = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.SIZE)
-                val typeColumn = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.MEDIA_TYPE)
+                val mimeColumn = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.MIME_TYPE)
                 while (cursor.moveToNext()) {
                     appBytes += cursor.getLong(sizeColumn)
-                    when (cursor.getInt(typeColumn)) {
-                        MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE -> photos += 1
-                        MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO -> videos += 1
+                    val mime = cursor.getString(mimeColumn) ?: ""
+                    when {
+                        mime.startsWith("video/") -> videos += 1
+                        mime.startsWith("image/") -> photos += 1
                     }
                 }
             }

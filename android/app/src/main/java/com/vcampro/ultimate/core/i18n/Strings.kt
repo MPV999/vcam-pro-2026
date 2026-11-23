@@ -34,7 +34,7 @@ open class Strings {
     open val apply: String = "Áp dụng"
     open val reset: String = "Đặt lại"
     open val export: String = "Xuất"
-    open val import: String = "Nhập"
+    open val importLabel: String = "Nhập"
     open val open: String = "Mở"
     open val start: String = "Bắt đầu"
     open val stop: String = "Dừng"

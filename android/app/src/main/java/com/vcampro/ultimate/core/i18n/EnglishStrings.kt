@@ -29,7 +29,7 @@ class EnglishStrings : Strings() {
     override val apply = "Apply"
     override val reset = "Reset"
     override val export = "Export"
-    override val import = "Import"
+    override val importLabel = "Import"
     override val open = "Open"
     override val start = "Start"
     override val stop = "Stop"

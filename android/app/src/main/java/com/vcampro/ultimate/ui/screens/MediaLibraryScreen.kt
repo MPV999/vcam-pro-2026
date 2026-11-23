@@ -162,7 +162,7 @@ fun MediaLibraryScreen(onBack: () -> Unit) {
         actions = {
             AssistChip(
                 onClick = { importLauncher.launch(arrayOf("image/*", "video/*")) },
-                label = { Text(strings.import, style = MaterialTheme.typography.labelSmall) },
+                label = { Text(strings.importLabel, style = MaterialTheme.typography.labelSmall) },
                 leadingIcon = { Icon(Icons.Filled.Add, null, Modifier.size(14.dp)) }
             )
         }
