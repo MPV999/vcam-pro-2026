@@ -1,0 +1,15 @@
+{
+  "published": false,
+  "version": "",
+  "versionCode": 0,
+  "apkName": "",
+  "apkSize": 0,
+  "sha256": "",
+  "minAndroid": "Android 10 (API 29)",
+  "abis": ["arm64-v8a", "armeabi-v7a"],
+  "releaseDate": "",
+  "releaseUrl": "https://github.com/MPV999/vcam-pro/releases",
+  "downloadUrl": "",
+  "signed": false,
+  "notes": "Bản phát hành đầu tiên đang được GitHub Actions dựng, ký và kiểm tra."
+}

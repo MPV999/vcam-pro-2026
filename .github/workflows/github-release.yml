@@ -1,0 +1,144 @@
+name: GitHub Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to publish (for example v1.0.0)'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build, sign and publish release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve version
+        id: version
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG="${{ github.event.inputs.tag }}"
+          else
+            TAG="${GITHUB_REF_NAME}"
+          fi
+          VERSION="${TAG#v}"
+          CODE=$(echo "$VERSION" | awk -F. '{ if (NF>=3) print $1*10000+$2*100+$3; else print 1 }')
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "code=$CODE" >> "$GITHUB_OUTPUT"
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Restore release keystore
+        if: ${{ secrets.VCAM_KEYSTORE_BASE64 != '' }}
+        working-directory: android
+        run: |
+          set -euo pipefail
+          mkdir -p keystore
+          printf '%s' "${{ secrets.VCAM_KEYSTORE_BASE64 }}" | base64 --decode > keystore/release.jks
+          {
+            echo "storePassword=${{ secrets.VCAM_KEYSTORE_PASSWORD }}"
+            echo "keyAlias=${{ secrets.VCAM_KEY_ALIAS }}"
+            echo "keyPassword=${{ secrets.VCAM_KEY_PASSWORD }}"
+          } > keystore/keystore.properties
+
+      - name: Unit tests
+        working-directory: android
+        env:
+          VCAM_VERSION_CODE: ${{ steps.version.outputs.code }}
+          VCAM_VERSION_NAME: ${{ steps.version.outputs.version }}
+        run: gradle :vcamsdk:testDebugUnitTest :app:testDebugUnitTest --no-daemon
+
+      - name: Assemble release APK
+        working-directory: android
+        env:
+          VCAM_VERSION_CODE: ${{ steps.version.outputs.code }}
+          VCAM_VERSION_NAME: ${{ steps.version.outputs.version }}
+        run: gradle :app:assembleRelease --no-daemon
+
+      - name: Validate APK, name it and checksum it
+        working-directory: android
+        run: |
+          set -euo pipefail
+          APK=$(find app/build/outputs/apk/release -name '*.apk' | head -n1)
+          BUILD_TOOLS=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -n1)
+          "$BUILD_TOOLS/aapt2" dump badging "$APK" | head -n 30
+          "$BUILD_TOOLS/apksigner" verify --verbose --print-certs "$APK"
+          OUT="$RUNNER_TEMP/vcampro-ultimate-${{ steps.version.outputs.version }}.apk"
+          cp "$APK" "$OUT"
+          ( cd "$RUNNER_TEMP" && sha256sum "$(basename "$OUT")" > SHA256SUMS.txt && cat SHA256SUMS.txt )
+          echo "APK=$OUT" >> "$GITHUB_ENV"
+
+      - name: Compose release notes with checksum
+        run: |
+          set -euo pipefail
+          SHA=$(sha256sum "$APK" | cut -d' ' -f1)
+          SIZE=$(stat -c%s "$APK")
+          {
+            cat docs/RELEASE-NOTES.md
+            echo ""
+            echo "## Thông tin tệp phát hành"
+            echo ""
+            echo "| Trường | Giá trị |"
+            echo "| --- | --- |"
+            echo "| Phiên bản | ${{ steps.version.outputs.version }} |"
+            echo "| Version code | ${{ steps.version.outputs.code }} |"
+            echo "| Tệp APK | vcampro-ultimate-${{ steps.version.outputs.version }}.apk |"
+            echo "| Dung lượng | ${SIZE} bytes |"
+            echo "| Android tối thiểu | 10 (API 29) |"
+            echo "| Kiến trúc | arm64-v8a, armeabi-v7a |"
+            echo ""
+            echo "SHA-256: ${SHA}"
+            echo ""
+            echo '```'
+            cat "$RUNNER_TEMP/SHA256SUMS.txt"
+            echo '```'
+          } > "$RUNNER_TEMP/notes.md"
+          echo "SHA=$SHA" >> "$GITHUB_ENV"
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          TAG="${{ steps.version.outputs.tag }}"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "$APK" "$RUNNER_TEMP/SHA256SUMS.txt" --clobber
+            gh release edit "$TAG" --notes-file "$RUNNER_TEMP/notes.md"
+          else
+            gh release create "$TAG" "$APK" "$RUNNER_TEMP/SHA256SUMS.txt" \
+              --title "VCAM PRO ULTIMATE VIP 2026 v${{ steps.version.outputs.version }}" \
+              --notes-file "$RUNNER_TEMP/notes.md" \
+              --target "$GITHUB_SHA"
+          fi
+
+      - name: Publish summary
+        run: |
+          {
+            echo "### Release v${{ steps.version.outputs.version }}"
+            echo ""
+            echo "APK uploaded: \`vcampro-ultimate-${{ steps.version.outputs.version }}.apk\`"
+            echo ""
+            echo "SHA-256: \`${{ env.SHA }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"

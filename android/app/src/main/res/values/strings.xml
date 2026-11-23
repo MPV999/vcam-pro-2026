@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">VCAM PRO</string>
+    <string name="app_full_name">VCAM PRO ULTIMATE VIP 2026</string>
+    <string name="file_provider_authority" translatable="false">com.vcampro.ultimate.fileprovider</string>
+</resources>

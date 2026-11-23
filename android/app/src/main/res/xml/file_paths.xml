@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <cache-path
+        name="vcam_cache"
+        path="." />
+    <files-path
+        name="vcam_files"
+        path="." />
+    <external-files-path
+        name="vcam_external"
+        path="." />
+</paths>

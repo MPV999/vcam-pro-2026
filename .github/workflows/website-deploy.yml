@@ -1,0 +1,85 @@
+name: Deploy Website
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'index.html'
+      - 'release.json'
+      - 'assets/**'
+      - 'docs/**'
+      - 'tools/**'
+      - '.github/workflows/website-deploy.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Publish GitHub Pages site
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare site directory
+        run: |
+          set -euo pipefail
+          mkdir -p _site
+          cp index.html release.json _site/
+          cp -r assets docs _site/
+          ls -la _site
+
+      - name: Read latest release metadata
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release view --json tagName,name,body,publishedAt,url,assets \
+            > "$RUNNER_TEMP/latest-release.json" || echo '{}' > "$RUNNER_TEMP/latest-release.json"
+          python3 tools/make_release_json.py "$RUNNER_TEMP/latest-release.json" "_site/release.json"
+          cat "_site/release.json"
+
+      - name: Verify download links
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, re, sys
+          data = json.load(open('_site/release.json'))
+          if not data.get('published'):
+              print('No release published yet; site shows the pending state.')
+              sys.exit(0)
+          url = data.get('downloadUrl') or ''
+          if not url.startswith('https://github.com/'):
+              print('ERROR: download URL is not a GitHub release asset: %r' % url)
+              sys.exit(1)
+          if not data.get('sha256'):
+              print('ERROR: missing sha256')
+              sys.exit(1)
+          print('Download URL OK:', url)
+          print('SHA-256 OK:', data['sha256'])
+          PY
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

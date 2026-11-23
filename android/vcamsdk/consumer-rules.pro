@@ -1,0 +1,3 @@
+-keep class com.vcampro.sdk.** { *; }
+-keepclassmembers class com.vcampro.sdk.** { *; }
+-dontwarn androidx.camera.**

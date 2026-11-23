@@ -1,0 +1,26 @@
+# Android / Gradle
+android/.gradle/
+android/build/
+android/app/build/
+android/vcamsdk/build/
+android/local.properties
+android/.idea/
+android/captures/
+*.iml
+*.hprof
+
+# Signing material (never commit)
+android/keystore/
+*.jks
+*.keystore
+
+# Outputs
+android/release/
+release-assets/
+_site/
+*.apk
+*.aab
+
+# OS
+.DS_Store
+Thumbs.db
