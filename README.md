@@ -89,6 +89,7 @@ Nguồn nền có thể là camera, **video có sẵn** hoặc ảnh tĩnh; khun
 
 - [Tài liệu SDK](docs/SDK.md)
 - [Hướng dẫn sử dụng](docs/HUONG-DAN-SU-DUNG.md)
+- [Bán hàng bằng video có sẵn — cách hợp lệ](docs/LIVE-BAN-HANG.md)
 - [Build, ký và phát hành](docs/BUILD.md)
 - [Changelog](docs/CHANGELOG.md)
 - [Báo cáo build/release và QA](docs/BAO-CAO.md)

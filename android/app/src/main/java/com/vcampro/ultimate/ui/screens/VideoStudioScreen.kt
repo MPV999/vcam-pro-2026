@@ -84,6 +84,7 @@ fun VideoStudioScreen(onBack: () -> Unit) {
     var speed by remember { mutableFloatStateOf(1f) }
     var rotation by remember { mutableIntStateOf(0) }
     var targetHeight by remember { mutableIntStateOf(0) }
+    var verticalOutput by remember { mutableStateOf(false) }
     var muteAudio by remember { mutableStateOf(false) }
     var busy by remember { mutableStateOf(false) }
     var progress by remember { mutableStateOf<Float?>(null) }
@@ -237,8 +238,11 @@ fun VideoStudioScreen(onBack: () -> Unit) {
                     ) {
                         listOf(0, 480, 720, 1080).forEach { height ->
                             FilterChip(
-                                selected = targetHeight == height,
-                                onClick = { targetHeight = height },
+                                selected = targetHeight == height && !verticalOutput,
+                                onClick = {
+                                    targetHeight = height
+                                    verticalOutput = false
+                                },
                                 label = {
                                     Text(
                                         text = if (height == 0) strings.original else "${height}p",
@@ -247,6 +251,16 @@ fun VideoStudioScreen(onBack: () -> Unit) {
                                 }
                             )
                         }
+                        FilterChip(
+                            selected = verticalOutput,
+                            onClick = {
+                                verticalOutput = true
+                                targetHeight = 0
+                            },
+                            label = {
+                                Text("1080x1920", style = MaterialTheme.typography.labelSmall)
+                            }
+                        )
                     }
                     Row(
                         modifier = Modifier
@@ -374,12 +388,14 @@ fun VideoStudioScreen(onBack: () -> Unit) {
                                     VideoEditorEngine.ExportOptions(
                                         trimStartMs = ((info?.durationMs ?: 0L) * trimStart).toLong(),
                                         trimEndMs = ((info?.durationMs ?: 0L) * trimEnd).toLong(),
-                                        targetWidth = if (targetHeight > 0) {
-                                            ((info?.width ?: 16) * targetHeight / (info?.height ?: 9))
-                                        } else {
-                                            0
+                                        targetWidth = when {
+                                            verticalOutput -> 1080
+                                            targetHeight > 0 ->
+                                                ((info?.width ?: 16) * targetHeight / (info?.height ?: 9))
+
+                                            else -> 0
                                         },
-                                        targetHeight = targetHeight,
+                                        targetHeight = if (verticalOutput) 1920 else targetHeight,
                                         rotationDegrees = rotation,
                                         speed = speed,
                                         muteAudio = muteAudio
@@ -432,7 +448,11 @@ fun VideoStudioScreen(onBack: () -> Unit) {
                     )
                     InfoRow(
                         label = strings.quality,
-                        value = if (targetHeight == 0) strings.original else "${targetHeight}p"
+                        value = when {
+                            verticalOutput -> "1080x1920 (dọc)"
+                            targetHeight == 0 -> strings.original
+                            else -> "${targetHeight}p"
+                        }
                     )
                 }
                 Spacer(modifier = Modifier.height(24.dp))

@@ -55,7 +55,8 @@ Thông tin HDR và độ phân giải hiển thị theo khả năng thật của
 7. **Xuất video** — mã hoá lại với hiệu ứng đã chọn, hiển thị tiến độ thật và cho phép huỷ.
 8. **Nén** — xuất bản 720p nhẹ hơn.
 
-Kết quả được lưu vào `Movies/VCAM PRO`.
+Kết quả được lưu vào `Movies/VCAM PRO`. Chọn chip **1080x1920** để xuất đúng khung dọc cho TikTok;
+xem thêm [hướng dẫn bán hàng bằng video có sẵn](LIVE-BAN-HANG.md).
 
 ## 6. Virtual Camera Studio
 1. Chọn **Nguồn dữ liệu**: camera trước, camera sau, tệp video, tệp ảnh, hoặc khung hình đã xử lý.
