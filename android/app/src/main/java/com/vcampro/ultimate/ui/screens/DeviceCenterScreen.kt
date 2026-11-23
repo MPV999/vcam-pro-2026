@@ -40,7 +40,9 @@ fun DeviceCenterScreen(onBack: () -> Unit) {
     val strings = LocalStrings.current
     val scope = rememberCoroutineScope()
     val profile by produceState<DeviceProfile?>(initialValue = null) {
-        value = withContext(Dispatchers.IO) { AppGraph.device.analyze() }
+        value = runCatching {
+            withContext(Dispatchers.IO) { AppGraph.device.analyze() }
+        }.getOrNull()
     }
     val settings by AppGraph.settings.settings
         .collectAsStateWithLifecycle(initialValue = VcamSettings())

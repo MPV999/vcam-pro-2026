@@ -65,7 +65,9 @@ fun DashboardScreen(onOpen: (String) -> Unit) {
     val strings = LocalStrings.current
     val scope = rememberCoroutineScope()
     val deviceProfile by produceState<DeviceProfile?>(initialValue = null) {
-        value = withContext(Dispatchers.IO) { AppGraph.device.analyze() }
+        value = runCatching {
+            withContext(Dispatchers.IO) { AppGraph.device.analyze() }
+        }.getOrNull()
     }
     val settings by AppGraph.settings.settings
         .collectAsStateWithLifecycle(initialValue = VcamSettings())

@@ -6,11 +6,13 @@ import androidx.datastore.preferences.core.MutablePreferences
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 
 private val Context.vcamDataStore: DataStore<Preferences> by preferencesDataStore(name = "vcam_settings")
@@ -58,7 +60,10 @@ class SettingsRepository(private val context: Context) {
         val lastUpdateCheck = longPreferencesKey("last_update_check")
     }
 
-    val settings: Flow<VcamSettings> = context.vcamDataStore.data.map { preferences ->
+    val settings: Flow<VcamSettings> = context.vcamDataStore.data
+        // A damaged preferences file must never take the app down at launch.
+        .catch { emit(emptyPreferences()) }
+        .map { preferences ->
         val defaults = VcamSettings()
         VcamSettings(
             language = preferences[Keys.language] ?: defaults.language,

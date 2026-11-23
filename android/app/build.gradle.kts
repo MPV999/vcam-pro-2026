@@ -62,8 +62,13 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = true
-            isShrinkResources = true
+            // R8 is intentionally off for now: the first release APK installed
+            // but exited at launch, which is what an over-eager Shrinker does to
+            // reflection based libraries (Room/Datastore/ML Kit startup). The
+            // rules in proguard-rules.pro are kept so minification can be turned
+            // back on after it is verified on a real device.
+            isMinifyEnabled = false
+            isShrinkResources = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

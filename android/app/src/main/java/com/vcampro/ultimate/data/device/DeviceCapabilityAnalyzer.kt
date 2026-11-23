@@ -22,7 +22,13 @@ import com.vcampro.ultimate.domain.model.PerformanceMode
  */
 class DeviceCapabilityAnalyzer(private val context: Context) {
 
-    fun analyze(): DeviceProfile {
+    /**
+     * Never throws: a device that hides a capability must not crash the app.
+     */
+    fun analyze(): DeviceProfile =
+        runCatching { analyzeInternal() }.getOrElse { fallbackProfile() }
+
+    private fun analyzeInternal(): DeviceProfile {
         val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
         val memoryInfo = ActivityManager.MemoryInfo().also { activityManager.getMemoryInfo(it) }
         val totalRamMb = memoryInfo.totalMem / (1024L * 1024L)
@@ -125,6 +131,36 @@ class DeviceCapabilityAnalyzer(private val context: Context) {
             supportsHdr = supportsHdr
         )
     }
+
+    /** Minimal profile used when the platform refuses to report capabilities. */
+    private fun fallbackProfile(): DeviceProfile = DeviceProfile(
+        model = Build.MODEL ?: "Android",
+        manufacturer = Build.MANUFACTURER ?: "Android",
+        androidRelease = Build.VERSION.RELEASE ?: Build.VERSION.SDK_INT.toString(),
+        sdkInt = Build.VERSION.SDK_INT,
+        cpuArchitectures = Build.SUPPORTED_ABIS?.toList() ?: listOf("arm64-v8a"),
+        cpuCores = Runtime.getRuntime().availableProcessors(),
+        totalRamMb = runCatching { totalRamMb() }.getOrDefault(0L),
+        availableRamMb = runCatching { totalRamMb() }.getOrDefault(0L),
+        totalStorageMb = 0L,
+        freeStorageMb = 0L,
+        cameraIds = emptyList(),
+        hasFrontCamera = false,
+        hasBackCamera = false,
+        hasFlash = false,
+        maxPhotoWidth = 0,
+        maxPhotoHeight = 0,
+        supportedPhotoSizes = emptyList(),
+        supportedVideoSizes = emptyList(),
+        supportedFpsRanges = emptyList(),
+        hardwareCodecs = emptyList(),
+        hardwareAcceleration = false,
+        recommendedMode = PerformanceMode.BALANCED,
+        recommendedWidth = 1280,
+        recommendedHeight = 720,
+        recommendedFps = 30,
+        supportsHdr = false
+    )
 
     /** Width/height/fps triple that a mode should actually use on this device. */
     fun recommendationFor(
