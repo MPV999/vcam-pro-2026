@@ -113,6 +113,7 @@ Repository phát hành: https://github.com/MPV999/vcam-pro-2026
 | 3 | Deploy Pages thất bại (403) | `POST /repos/{owner}/{repo}/pages` trả "Resource not accessible by integration": Pages phải được bật một lần trong Settings. Workflow nay cảnh báo và bỏ qua thay vì fail; website sẽ tự deploy sau khi bật. |
 | 4 | `:vcamsdk:compileDebugKotlin` thất bại | Thuộc tính `consumer` trong `BaseCameraSource` sinh setter `setConsumer(...)` trùng chữ ký JVM với hàm `setConsumer` của interface. Đã đổi tên trường thành `frameConsumer`. |
 | 5 | `:app:compileDebugKotlin` thất bại (5 lỗi) | (a) Pager của foundation 1.6 là API thử nghiệm → thêm `@OptIn(ExperimentalFoundationApi::class)`; (b) `KeyboardOptions` nằm ở `androidx.compose.foundation.text`; (c) `MediaStore.Files.FileColumns.MEDIA_TYPE` không tồn tại → đếm ảnh/video theo MIME type. |
+| 6 | Website không đọc được bản phát hành dù GitHub đã có | Trang chỉ đọc `release.json` tĩnh (tệp sinh lúc build), trong khi Pages chưa được bật nên bản deploy không tồn tại. Nay `assets/app.js` gọi trực tiếp `GET /repos/{owner}/{repo}/releases/latest` và `/releases?per_page=8` (CORS công khai): luôn khớp bản phát hành thật, `release.json` chỉ còn là phương án dự phòng. Version code suy ra từ tag khi thân release không có, và APK ký debug vẫn được ghi rõ. |
 
 ### Việc cần làm một lần (chỉ chủ repository)
 
